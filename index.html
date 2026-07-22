@@ -935,12 +935,12 @@
         <h2 style="display:flex; align-items:baseline; justify-content:space-between; flex-wrap:wrap; row-gap:6px;">
           <span>Распорядок дня <span class="count" id="progressCount"></span></span>
           <span style="display:flex; gap:6px;">
-            <button type="button" class="edit-toggle-btn" id="scheduleEditToggle">На сегодня</button>
-            <button type="button" class="edit-toggle-btn" id="scheduleBaseEditToggle">По дням</button>
+            <button type="button" class="edit-toggle-btn" id="scheduleBaseEditToggle">Изменить</button>
           </span>
         </h2>
         <div id="planDropdown" style="display:none; position:relative; z-index:10; background:var(--surface-2); border:0.5px solid var(--border-strong); border-radius:10px; margin-top:6px; overflow:hidden;">
-          <div class="plan-day-row" data-dow="-1" style="font-weight:500;">План на каждый день</div>
+          <div class="plan-day-row" data-dow="today" style="font-weight:500;">Сегодня</div>
+          <div class="plan-day-row" data-dow="-1">Каждый день</div>
           <div class="plan-day-row" data-dow="1">Понедельник</div>
           <div class="plan-day-row" data-dow="2">Вторник</div>
           <div class="plan-day-row" data-dow="3">Среда</div>
@@ -2172,53 +2172,39 @@
     }
   }
 
-  document.getElementById("scheduleEditToggle").addEventListener("click", function () {
-    scheduleEditing = !scheduleEditing;
-    if (scheduleEditing && baseEditing) {
-      baseEditing = false;
-      var baseBtn = document.getElementById("scheduleBaseEditToggle");
-      baseBtn.classList.remove("active");
-      baseBtn.textContent = "По дням";
-    }
-    this.classList.toggle("active", scheduleEditing);
-    this.textContent = scheduleEditing ? "Готово" : "На сегодня";
-    document.getElementById("scheduleAddForm").style.display = (scheduleEditing || baseEditing) ? "flex" : "none";
-    updateScheduleEditHint();
-    renderTimeline();
-  });
-
   document.getElementById("scheduleBaseEditToggle").addEventListener("click", function () {
     var dropdown = document.getElementById("planDropdown");
     var isOpen = dropdown.style.display !== "none";
     if (isOpen) {
       dropdown.style.display = "none";
       baseEditing = false;
+      scheduleEditing = false;
       this.classList.remove("active");
-      this.textContent = "По дням";
-      document.getElementById("scheduleAddForm").style.display = scheduleEditing ? "flex" : "none";
+      document.getElementById("scheduleAddForm").style.display = "none";
       updateScheduleEditHint();
       renderTimeline();
     } else {
       dropdown.style.display = "block";
       this.classList.add("active");
-      this.textContent = "Готово";
     }
   });
 
-  document.querySelectorAll(".plan-day-row").forEach(function(row) {
+  document.querySelectorAll("#planDropdown .plan-day-row").forEach(function(row) {
     row.addEventListener("click", function() {
-      planEditDow = parseInt(this.dataset.dow);
-      baseEditing = true;
-      if (scheduleEditing) {
-        scheduleEditing = false;
-        var dayBtn = document.getElementById("scheduleEditToggle");
-        dayBtn.classList.remove("active");
-        dayBtn.textContent = "На сегодня";
-      }
-      document.querySelectorAll(".plan-day-row").forEach(function(r){ r.classList.remove("plan-active"); });
+      var dowVal = this.dataset.dow;
+      document.querySelectorAll("#planDropdown .plan-day-row").forEach(function(r){ r.classList.remove("plan-active"); });
       this.classList.add("plan-active");
       document.getElementById("planDropdown").style.display = "none";
+      document.getElementById("scheduleBaseEditToggle").classList.remove("active");
       document.getElementById("scheduleAddForm").style.display = "flex";
+      if (dowVal === "today") {
+        scheduleEditing = true;
+        baseEditing = false;
+      } else {
+        scheduleEditing = false;
+        baseEditing = true;
+        planEditDow = parseInt(dowVal);
+      }
       updateScheduleEditHint();
       renderTimeline();
     });
