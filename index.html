@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
@@ -940,7 +940,7 @@
           </span>
         </h2>
         <div id="planDropdown" style="display:none; position:relative; z-index:10; background:var(--surface-2); border:0.5px solid var(--border-strong); border-radius:10px; margin-top:6px; overflow:hidden;">
-          <div class="plan-day-row" data-dow="-1" style="font-weight:500;">Общий план (все дни)</div>
+          <div class="plan-day-row" data-dow="-1" style="font-weight:500;">План на каждый день</div>
           <div class="plan-day-row" data-dow="1">Понедельник</div>
           <div class="plan-day-row" data-dow="2">Вторник</div>
           <div class="plan-day-row" data-dow="3">Среда</div>
@@ -995,7 +995,8 @@
             <button type="button" class="edit-toggle-btn" id="catalogInlineEditBtn">Изменить</button>
           </div>
           <form class="shopping-form" id="catalogInlineForm" style="margin-bottom:8px;">
-            <input class="f-place" id="fCatalogInlinePlace" placeholder="Место" autocomplete="off" maxlength="24">
+            <input class="f-place" id="fCatalogInlinePlace" placeholder="Место" autocomplete="off" maxlength="24" list="catalogPlacesList">
+            <datalist id="catalogPlacesList"></datalist>
             <input class="f-what" id="fCatalogInlineWhat" placeholder="Название" autocomplete="off" maxlength="80" required>
             <button type="submit">+</button>
           </form>
@@ -2146,8 +2147,25 @@
       hint.style.display = "block";
     } else if (baseEditing) {
       var dowNames = ["Воскресенье","Понедельник","Вторник","Среда","Четверг","Пятница","Суббота"];
-      var dayName = planEditDow === -1 ? "все дни" : dowNames[planEditDow];
-      hint.textContent = "Редактируешь план на: " + dayName + ". Повторяется каждую неделю.";
+      var dayName = planEditDow === -1 ? "каждый день" : dowNames[planEditDow];
+      hint.innerHTML = "Редактируешь план на: " + dayName + ". Повторяется каждую неделю.";
+      if (planEditDow === -1) {
+        hint.innerHTML += ' <button type="button" id="copyFromTodayBtn" style="margin-left:6px;font-size:11px;background:var(--accent-soft);color:var(--accent-strong);border:none;border-radius:6px;padding:2px 7px;cursor:pointer;">Взять из сегодня</button>';
+        setTimeout(function() {
+          var btn = document.getElementById("copyFromTodayBtn");
+          if (btn) btn.addEventListener("click", function() {
+            var override = loadOverride(isoKey(current));
+            var dow = current.getDay();
+            var todayPlan = computeEffectiveSchedule(override, dow);
+            var cleaned = todayPlan.map(function(item) {
+              return { id: "s" + Date.now() + Math.random(), start: item.start, end: item.end, label: item.label };
+            });
+            saveSchedule(cleaned);
+            SCHEDULE = loadSchedule();
+            renderTimeline();
+          });
+        }, 0);
+      }
       hint.style.display = "block";
     } else {
       hint.style.display = "none";
@@ -2776,6 +2794,7 @@ function setTab(name) {
 
   function renderInlineCatalog(editing) {
     catalogInlineEditing = editing;
+    updateCatalogPlacesList();
     var btn = document.getElementById("catalogInlineEditBtn");
     if (btn) { btn.textContent = editing ? "Готово" : "Изменить"; btn.classList.toggle("active", editing); }
     var catalog = loadCatalog();
@@ -2848,6 +2867,18 @@ function setTab(name) {
   document.getElementById("catalogInlineEditBtn").addEventListener("click", function() {
     renderInlineCatalog(!catalogInlineEditing);
   });
+
+  function updateCatalogPlacesList() {
+    var dl = document.getElementById("catalogPlacesList");
+    if (!dl) return;
+    var catalog = loadCatalog();
+    var places = [];
+    catalog.forEach(function(item) {
+      if (item.place && places.indexOf(item.place) === -1) places.push(item.place);
+    });
+    places.sort(function(a, b) { return a.localeCompare(b, "ru"); });
+    dl.innerHTML = places.map(function(p) { return '<option value="' + escapeHtml(p) + '">'; }).join("");
+  }
 
   document.getElementById("catalogInlineForm").addEventListener("submit", function(e) {
     e.preventDefault();
