@@ -973,12 +973,12 @@
 
     <div class="tab-panel" data-panel="diary">
       <section class="card">
-        <h2>Как прошёл день</h2>
+        <h2>Мысли дня</h2>
         <textarea id="notes" placeholder="Как прошёл день, что важно запомнить..."></textarea>
       </section>
 
       <section class="card" style="margin-top: 20px;">
-        <h2>Осознания</h2>
+        <h2>Понимания</h2>
         <textarea id="insights" placeholder="Что поняла, что осознала..."></textarea>
       </section>
     </div>
@@ -987,8 +987,8 @@
       <section class="card shop-card" id="shoppingSection">
         <h2>Продукты</h2>
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-bottom:10px;">
-          <button type="button" class="edit-toggle-btn" id="shoppingCatalogBtn" style="justify-content:center;">Каталог</button>
-          <button type="button" class="edit-toggle-btn" id="shoppingDayBtn" style="justify-content:center;">День покупки</button>
+          <button type="button" class="edit-toggle-btn" id="shoppingCatalogBtn" style="justify-content:center; padding:10px 0;">Каталог</button>
+          <button type="button" class="edit-toggle-btn" id="shoppingDayBtn" style="justify-content:center; padding:10px 0;">День покупки</button>
         </div>
         <div id="shoppingInlineCatalog" style="display:none; margin-bottom:8px;">
           <div style="display:flex; justify-content:flex-end; margin-bottom:6px;">
@@ -1519,7 +1519,7 @@
     wrap.querySelectorAll(".block").forEach(function(el){ el.remove(); });
 
     if (baseEditing) {
-      var editPlan = planEditDow === -1 ? SCHEDULE.slice() : (loadWeekPlans()[String(planEditDow)] || []).slice();
+      var editPlan = planEditDow === -1 ? SCHEDULE.slice() : (loadWeekPlans()[String(planEditDow)] || SCHEDULE.slice()).slice();
       editPlan.sort(function(a,b){ return a.start < b.start ? -1 : (a.start > b.start ? 1 : 0); });
       editPlan.forEach(function (item) {
           var row = document.createElement("div");
@@ -2149,23 +2149,6 @@
       var dowNames = ["Воскресенье","Понедельник","Вторник","Среда","Четверг","Пятница","Суббота"];
       var dayName = planEditDow === -1 ? "каждый день" : dowNames[planEditDow];
       hint.innerHTML = "Редактируешь план на: " + dayName + ". Повторяется каждую неделю.";
-      if (planEditDow === -1) {
-        hint.innerHTML += ' <button type="button" id="copyFromTodayBtn" style="margin-left:6px;font-size:11px;background:var(--accent-soft);color:var(--accent-strong);border:none;border-radius:6px;padding:2px 7px;cursor:pointer;">Взять из сегодня</button>';
-        setTimeout(function() {
-          var btn = document.getElementById("copyFromTodayBtn");
-          if (btn) btn.addEventListener("click", function() {
-            var override = loadOverride(isoKey(current));
-            var dow = current.getDay();
-            var todayPlan = computeEffectiveSchedule(override, dow);
-            var cleaned = todayPlan.map(function(item) {
-              return { id: "s" + Date.now() + Math.random(), start: item.start, end: item.end, label: item.label };
-            });
-            saveSchedule(cleaned);
-            SCHEDULE = loadSchedule();
-            renderTimeline();
-          });
-        }, 0);
-      }
       hint.style.display = "block";
     } else {
       hint.style.display = "none";
