@@ -1,0 +1,11 @@
+{
+  "name": "Мой день",
+  "short_name": "Мой день",
+  "description": "Личный трекер: распорядок дня, дневник, покупки, калории",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#D98CA0",
+  "lang": "ru"
+}
