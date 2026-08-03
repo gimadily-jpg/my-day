@@ -1046,11 +1046,12 @@
 
       <section class="card">
         <h2>Питание</h2>
-        <div id="nutritionParams" style="margin:8px 0 14px; font-size:13px;">
+        <button type="button" class="edit-toggle-btn" id="nutritionParamsToggle" style="margin-bottom:8px;">Внести свои параметры</button>
+        <div id="nutritionParams" style="display:none; margin:8px 0 14px; font-size:13px;">
           <div style="display:flex; gap:12px; flex-wrap:wrap; margin-bottom:8px; align-items:center;">
             <span style="display:flex; gap:8px;">
-              <label style="display:flex; align-items:center; gap:4px; cursor:pointer;"><input type="radio" name="nutritionGender" value="f" id="genderF"> Женский</label>
-              <label style="display:flex; align-items:center; gap:4px; cursor:pointer;"><input type="radio" name="nutritionGender" value="m" id="genderM"> Мужской</label>
+              <label style="display:flex; align-items:center; gap:4px; cursor:pointer;"><input type="radio" name="nutritionGender" value="f" id="genderF"> Женщина</label>
+              <label style="display:flex; align-items:center; gap:4px; cursor:pointer;"><input type="radio" name="nutritionGender" value="m" id="genderM"> Мужчина</label>
             </span>
             <label style="display:flex; align-items:center; gap:4px;">Возраст <input id="nutritionAge" type="number" min="10" max="100" inputmode="numeric" style="width:46px; font:inherit; font-size:13px; border:none; border-bottom:1px solid var(--line); background:none; text-align:center; color:var(--ink); outline:none;"> лет</label>
             <label style="display:flex; align-items:center; gap:4px;">Рост <input id="nutritionHeight" type="number" min="100" max="250" inputmode="numeric" style="width:50px; font:inherit; font-size:13px; border:none; border-bottom:1px solid var(--line); background:none; text-align:center; color:var(--ink); outline:none;"> см</label>
@@ -1074,6 +1075,7 @@
             <button type="button" class="nutr-goal-btn" data-goal="gain">Набор массы</button>
           </div>
         </div>
+        <div id="weightPaceHint" style="display:none; font-size:12px; color:var(--ink-muted); margin-bottom:10px; line-height:1.5;"></div>
         <div class="chart-title" style="margin-bottom: 4px;">Калории, ккал</div>
         <div class="kcal-summary">
           <div class="kcal-stat">
@@ -1392,6 +1394,32 @@
     document.getElementById("carbsGoal").value = carbs;
     saveGoal(kcal); saveProteinGoal(protein); saveFatGoal(fat); saveCarbsGoal(carbs);
     renderNutrition();
+    renderWeightPace();
+  }
+
+  function renderWeightPace() {
+    var hint = document.getElementById("weightPaceHint");
+    if (!hint) return;
+    var p = loadNutritionParams();
+    var weight = parseFloat(document.getElementById("weightInput").value) || 0;
+    var target = parseFloat(p.targetWeight) || 0;
+    var kcalGoal = parseFloat(document.getElementById("kcalGoal").value) || 0;
+    if (!weight || !target || !kcalGoal || !p.age || !p.height) { hint.style.display = "none"; return; }
+    var diff = Math.abs(weight - target);
+    if (diff < 0.5) { hint.textContent = "Вес на цели."; hint.style.display = "block"; return; }
+    var bmr = p.gender === "m"
+      ? 10 * weight + 6.25 * parseFloat(p.height) - 5 * parseFloat(p.age) + 5
+      : 10 * weight + 6.25 * parseFloat(p.height) - 5 * parseFloat(p.age) - 161;
+    var tdee = bmr * parseFloat(p.activity);
+    var delta = kcalGoal - tdee;
+    if (Math.abs(delta) <= 20) { hint.style.display = "none"; return; }
+    var wantLose = target < weight;
+    if (wantLose && delta >= 0) { hint.textContent = "Цель — похудение, но выбранная калорийность не создаёт дефицита."; hint.style.display = "block"; return; }
+    if (!wantLose && delta <= 0) { hint.textContent = "Цель — набор массы, но выбранная калорийность не создаёт профицита."; hint.style.display = "block"; return; }
+    var weeks = Math.round(diff * 7700 / (Math.abs(delta) * 7));
+    var direction = delta < 0 ? "дефиците" : "профиците";
+    hint.textContent = "До цели: " + diff.toFixed(1).replace(".",",") + " кг — ориентировочно " + weeks + " нед. при текущем " + direction + ". Ориентир, не гарантия.";
+    hint.style.display = "block";
   }
 
   function emptyDay() { return { checked: {}, notes: "", insights: "", meals: [], weight: null, scheduleOverride: { removed: [], edited: {}, added: [] } }; }
@@ -2388,6 +2416,7 @@
     var v = Number(e.target.value) || 0;
     saveGoal(v);
     renderNutrition();
+    renderWeightPace();
   });
 
   document.getElementById("proteinGoal").addEventListener("change", function (e) {
@@ -2446,6 +2475,13 @@
     document.getElementById("nutritionHeight").addEventListener("change", onParamChange);
     document.getElementById("nutritionActivity").addEventListener("change", onParamChange);
     document.getElementById("targetWeightInput").addEventListener("change", onParamChange);
+
+    document.getElementById("nutritionParamsToggle").addEventListener("click", function() {
+      var panel = document.getElementById("nutritionParams");
+      var open = panel.style.display !== "none";
+      panel.style.display = open ? "none" : "block";
+      this.classList.toggle("active", !open);
+    });
 
     document.querySelectorAll(".nutr-goal-btn").forEach(function(btn) {
       btn.addEventListener("click", function() {
@@ -2532,7 +2568,87 @@
     ["борщ",42,2,1.5,5],["суп куриный",35,3,1,3],["суп",35,3,1,3],
     ["шоколад тёмный",539,8,35,45],["шоколад",535,7,33,55],
     ["торт безе",310,3,0,75],["торт наполеон",360,5,18,45],
-    ["торт красный бархат",370,4,18,48],["меренговый рулет",290,4,8,52]
+    ["торт красный бархат",370,4,18,48],["меренговый рулет",290,4,8,52],
+    // супы
+    ["солянка",52,4,3,3],["рассольник",40,2.5,1.5,5],["харчо",65,4,3,6],
+    ["уха",28,3,1,2],["суп-пюре тыквенный",48,1.5,2,7],["минестроне",38,2,1,6],
+    ["окрошка",42,3,1.5,5],["щи",36,2,1.5,4],["гороховый суп",66,5,2,8],
+    ["суп из чечевицы",72,5,1.5,11],
+    // мясные блюда
+    ["шашлык из свинины",218,16,17,0],["шашлык из курицы",145,20,7,0],
+    ["стейк говяжий",200,26,11,0],["антрекот",250,22,17,0],
+    ["пельмени",265,11,11,29],["вареники с картошкой",195,6,5,33],
+    ["вареники с творогом",210,10,6,30],["манты",210,12,9,22],
+    ["долма",165,9,9,13],["голубцы",110,8,5,9],
+    ["биточки",175,14,10,7],["тефтели",155,13,8,8],
+    ["зразы",190,14,10,11],["плов",220,8,9,27],
+    ["бефстроганов",175,17,10,5],["гуляш",135,15,7,4],
+    // птица
+    ["утка",308,16,28,0],["куриные крылышки",186,18,12,0],
+    ["куриные ножки",197,19,13,0],["куриное сердце",159,16,10,0.5],
+    // рыба и морепродукты
+    ["форель",148,20,8,0],["судак",84,18,1,0],["карп",96,16,4,0],
+    ["дорадо",96,20,2,0],["сибас",99,19,3,0],["тилапия",96,20,2,0],
+    ["щука",84,18,1,0],["окунь",82,18,1,0],
+    ["креветки",85,18,1,0],["мидии",86,12,2,3],["кальмар",82,18,1,0],
+    ["крабовые палочки",73,6,1,10],
+    // молочные
+    ["ряженка",85,3,4,4.2],["варенец",75,3,3.2,4],["простокваша",58,2.9,3.2,4],
+    ["брынза",260,18,20,0],["фета",264,14,21,4],["моцарелла",280,18,22,2.2],
+    ["пармезан",431,38,29,0],["рикотта",174,11,13,3],["маскарпоне",429,7,43,3],
+    ["сыр плавленый",270,16,23,3],["сыр козий",290,22,21,0],
+    // выпечка и хлеб
+    ["блины",200,6,7,27],["оладьи",230,7,9,32],["pancakes",200,6,7,27],
+    ["пирожок с капустой",220,6,8,32],["пирожок с мясом",240,9,11,28],
+    ["ватрушка",280,7,10,42],["булочка",290,8,8,46],
+    ["круассан",406,8,21,46],["пицца",270,12,11,31],
+    ["шаурма",220,13,10,22],["бургер",280,14,13,27],["хот-дог",250,11,14,22],
+    ["сэндвич",230,12,8,28],
+    // салаты
+    ["салат оливье",160,5,12,9],["салат цезарь",120,8,8,5],
+    ["греческий салат",95,3,7,6],["винегрет",80,2,4,10],
+    ["салат с тунцом",110,12,5,4],
+    // десерты
+    ["мороженое пломбир",227,3.5,15,20],["мороженое",180,3,10,20],
+    ["пончик",330,5,14,45],["эклер",262,6,15,27],
+    ["чизкейк",325,5,22,28],["брауни",380,5,20,46],
+    ["тирамису",295,6,20,25],["маффин",340,5,14,50],
+    ["печенье",430,7,17,64],["вафли",350,7,11,55],
+    ["зефир",299,1,0.1,73],["мармелад",293,1,0,72],
+    ["карамель",382,0.1,0.1,96],["халва",516,12,30,54],
+    // орехи и сухофрукты
+    ["фисташки",562,20,45,28],["кедровый орех",673,14,68,13],
+    ["чернослив",231,2.3,0.7,57],["курага",215,3.2,0.5,51],
+    ["изюм",264,2.3,0.6,66],["финики",274,1.8,0.4,68],
+    // напитки
+    ["кофе с молоком",34,1.7,1.5,3.5],["латте",58,3,2.5,6],
+    ["капучино",68,3.5,3,7],["какао",64,3,2.5,8],
+    ["кефир 1%",40,3,1,4.1],["молоко 2.5%",52,2.9,2.5,4.7],
+    // грибы
+    ["шампиньоны",27,4.3,1,1],["вешенки",38,3.3,0.4,6.1],
+    ["лисички",32,1.6,1,2.5],["белый гриб сушёный",280,30,4,10],
+    ["грибы жареные",55,2.5,3.5,4],["грибы маринованные",18,1,0,4],
+    // овощи дополнительно
+    ["руккола",25,2.6,0.7,2],["шпинат свежий",23,2.9,0.4,2],
+    ["сельдерей",13,0.9,0.1,2.1],["редис",19,1.2,0.1,3.4],
+    ["спаржа",20,2.2,0.1,3.1],["артишок",47,3.3,0.2,10],
+    ["айсберг",14,0.9,0.1,2.9],["кинза",23,2.1,0.5,3.7],
+    // соусы и заправки
+    ["хумус",166,8,10,14],["гуакамоле",160,2,15,8],
+    ["аджика",59,1,1,12],["ткемали",80,0.5,0,19],
+    ["соус тартар",470,1,50,5],["соус песто",454,5,46,4],
+    ["горчица",162,9,8,14],["хрен",59,3.2,0.4,11],
+    // фрукты дополнительно
+    ["манго",60,0.8,0.4,15],["ананас",50,0.5,0.3,13],
+    ["папайя",43,0.5,0.3,11],["кокос",354,3.3,35,15],
+    ["помело",25,0.5,0.1,5.6],["маракуйя",97,2.2,0.7,23],
+    // крупы и бобовые дополнительно
+    ["кускус вареный",112,3.8,0.6,23],["полента вареная",70,1.5,0.7,14],
+    ["чечевица красная вареная",100,8,0.4,18],["маш вареный",105,7,0.4,19],
+    ["нут жареный",364,19,6,61],
+    // яйца
+    ["яйцо вареное",155,12,11,1],["яйцо пашот",155,12,11,1],
+    ["глазунья",160,10,13,1]
   ];
 
   function getItemGrams(name) {
