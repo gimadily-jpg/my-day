@@ -1167,25 +1167,7 @@
 
 <script>
 (function () {
-  var DEFAULT_SCHEDULE = [
-    { id: "s1", start: "06:00", end: "07:00", label: "Прогулка" },
-    { id: "s2", start: "07:00", end: "08:00", label: "Зарядка" },
-    { id: "s3", start: "08:00", end: "08:30", label: "Завтрак" },
-    { id: "s4", start: "08:30", end: "09:45", label: "Чтение книги" },
-    { id: "s5", start: "09:45", end: "10:12", label: "Практика" },
-    { id: "s6", start: "10:12", end: "12:00", label: "Тренировка" },
-    { id: "s7", start: "12:00", end: "14:00", label: "Работа" },
-    { id: "s8", start: "14:00", end: "14:20", label: "Обед" },
-    { id: "s9", start: "14:20", end: "14:45", label: "Прогулка" },
-    { id: "s10", start: "14:45", end: "15:24", label: "Практика" },
-    { id: "s11", start: "15:24", end: "18:00", label: "Работа" },
-    { id: "s12", start: "18:00", end: "19:30", label: "Прогулка" },
-    { id: "s13", start: "19:30", end: "20:00", label: "Ужин" },
-    { id: "s14", start: "20:00", end: "21:45", label: "Работа" },
-    { id: "s15", start: "21:45", end: "22:24", label: "Практика" },
-    { id: "s16", start: "22:24", end: "23:00", label: "Работа" },
-    { id: "s17", start: "23:00", end: "06:00", label: "Сон" }
-  ];
+  var DEFAULT_SCHEDULE = [];
   var SCHEDULE_KEY = "tracker.schedule";
   var SCHEDULE_SEED_VERSION = 2;
   function loadSchedule() {
@@ -1231,57 +1213,10 @@
   var SHOPPING_BOUGHT_KEY_PREFIX = "tracker.shoppingBought.";
   var WISHLIST_KEY = "tracker.wishlist";
 
-  var DEFAULT_SHOPPING = [
-    { id: "sh1", place: "Мясной магазин", what: "Фарш, 800 г × 2" },
-    { id: "sh2", place: "Мясной магазин", what: "Курица, 2,4 кг (2,6 кг если с шкуркой и костями)" },
-    { id: "sh3", place: "Мясной магазин", what: "На суп, 1,5 кг" },
-    { id: "sh4", place: "Мясной магазин", what: "Язык или печень, 800 г" },
-    { id: "sh5", place: "Ори", what: "Хлеб с семечками × 2" },
-    { id: "sh6", place: "Ори", what: "Хлеб с черносливом × 1" },
-    { id: "sh7", place: "Ори", what: "Хлебцы × 4" },
-    { id: "sh8", place: "Ори", what: "Спагетти × 2" },
-    { id: "sh9", place: "Бони молочка", what: "Яйца, 2 кассеты" },
-    { id: "sh10", place: "Бони молочка", what: "Сливочное масло, 1 кг" },
-    { id: "sh11", place: "Бони молочка", what: "Каймак, 1 маленький контейнер" },
-    { id: "sh12", place: "Бони молочка", what: "Лаваш в зелёном квадратном пакете × 1" },
-    { id: "sh13", place: "Бони молочка", what: "Рисовая мука, 1 кг" },
-    { id: "sh14", place: "Магазин в Бони", what: "Майонез" },
-    { id: "sh15", place: "Магазин в Бони", what: "Таблетки для посудомойки" },
-    { id: "sh16", place: "Магазин в Бони", what: "Масло авокадо, 200 мл" },
-    { id: "sh17", place: "Рынок", what: "Свёкла" },
-    { id: "sh18", place: "Рынок", what: "Картошка" },
-    { id: "sh19", place: "Рынок", what: "Морковь" },
-    { id: "sh20", place: "Рынок", what: "Лук" },
-    { id: "sh21", place: "Рынок", what: "Помидоры" },
-    { id: "sh22", place: "Рынок", what: "Огурцы" },
-    { id: "sh23", place: "Рынок", what: "Красный перец" },
-    { id: "sh24", place: "Рынок", what: "Зелёный перец" },
-    { id: "sh25", place: "Рынок", what: "Брокколи" },
-    { id: "sh26", place: "Рынок", what: "Зелень" },
-    { id: "sh27", place: "Рынок", what: "Груши" },
-    { id: "sh28", place: "Рынок", what: "Абрикосы" },
-    { id: "sh29", place: "Рынок", what: "Персики" },
-    { id: "sh30", place: "Рынок", what: "Черешня" },
-    { id: "sh31", place: "Рынок", what: "Голубика" },
-    { id: "sh32", place: "Рынок", what: "Малина" },
-    { id: "sh33", place: "Рынок", what: "Бананы" },
-    { id: "sh34", place: "Рынок", what: "Апельсины" },
-    { id: "sh35", place: "Рынок", what: "Лимоны" },
-    { id: "sh36", place: "Рынок", what: "Инжир" }
-  ];
+  var DEFAULT_SHOPPING = [];
   var SHOPPING_SEED_VERSION = 6;
 
-  var DEFAULT_WISHLIST = [
-    { what: "Средство для раковины и унитаза", bought: false },
-    { what: "Флешка", bought: false },
-    { what: "Платье для пляжа Лане", bought: false },
-    { what: "Светлый рюкзак", bought: false },
-    { what: "Резиновый круг", bought: false },
-    { what: "Палки", bought: false },
-    { what: "Лифчик/топ без косточек, без всего", bought: false },
-    { what: "Крем корейский", bought: false },
-    { what: "Линзы", bought: false }
-  ];
+  var DEFAULT_WISHLIST = [];
   var WISHLIST_SEED_VERSION = 1;
 
   localStorage.removeItem("tracker.quoteIndex");
