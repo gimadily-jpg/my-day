@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
@@ -985,23 +985,11 @@
 
     <div class="tab-panel" data-panel="shopping">
       <section class="card shop-card" id="shoppingSection">
-        <h2>Продукты</h2>
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-bottom:10px;">
-          <button type="button" class="edit-toggle-btn" id="shoppingCatalogBtn" style="justify-content:center; padding:10px 0;">Каталог</button>
-          <button type="button" class="edit-toggle-btn" id="shoppingDayBtn" style="justify-content:center; padding:10px 0;">День покупки</button>
-        </div>
-        <div id="shoppingInlineCatalog" style="display:none; margin-bottom:8px;">
-          <div style="display:flex; justify-content:flex-end; margin-bottom:6px;">
-            <button type="button" class="edit-toggle-btn" id="catalogInlineEditBtn">Изменить</button>
-          </div>
-          <form class="shopping-form" id="catalogInlineForm" style="margin-bottom:8px;">
-            <input class="f-place" id="fCatalogInlinePlace" placeholder="Место" autocomplete="off" maxlength="24" list="catalogPlacesList">
-            <datalist id="catalogPlacesList"></datalist>
-            <input class="f-what" id="fCatalogInlineWhat" placeholder="Название" autocomplete="off" maxlength="80" required>
-            <button type="submit">+</button>
-          </form>
-          <div id="shoppingInlineCatalogList"></div>
-        </div>
+        <h2 style="display:flex; align-items:baseline; justify-content:space-between;">
+          <span>Продукты</span>
+          <button type="button" class="edit-toggle-btn" id="shoppingDayBtn">День покупки</button>
+        </h2>
+        <datalist id="shoppingWhatList"></datalist>
         <div id="shoppingDayDropdown" style="display:none; background:var(--surface-2); border:0.5px solid var(--border-strong); border-radius:10px; margin-bottom:8px; overflow:hidden;">
           <div class="plan-day-row" data-dow="1">Понедельник</div>
           <div class="plan-day-row" data-dow="2">Вторник</div>
@@ -1129,7 +1117,6 @@
       <section class="card">
         <h2>Приёмы пищи <span class="count" id="mealsCount"></span></h2>
         <div id="mealsList"></div>
-        <div class="footnote" style="text-align: left; padding-top: 10px;">Пришли фото или описание блюда в Telegram — оценю калории и КБЖУ в таком формате, его можно вставить целиком ниже.</div>
       </section>
     </div>
 
@@ -1661,6 +1648,7 @@
   }
 
   function renderShopping() {
+    updateShoppingWhatList();
     var list = loadShopping();
     var shoppingDateKey = isoKey(current);
     var bought = loadShoppingBought(shoppingDateKey);
@@ -1756,12 +1744,44 @@
         row.querySelector(".remove").addEventListener("click", function () {
           lastRemovedShopping = { item: list.splice(idx, 1)[0], idx: idx };
           saveShopping(list);
-
           renderShopping();
         });
         wrap.appendChild(row);
       });
+
+      (function(placeName) {
+        var addRow = document.createElement("form");
+        addRow.style.cssText = "display:flex; gap:6px; padding:6px 0 2px; align-items:center;";
+        addRow.innerHTML =
+          '<input style="flex:1; font-size:14px; background:none; border:none; border-bottom:1px solid var(--line); outline:none; padding:2px 0; color:var(--ink);" placeholder="+ Добавить позицию" autocomplete="off" maxlength="80" list="shoppingWhatList" class="inline-add-what">' +
+          '<input style="width:60px; font-size:14px; background:none; border:none; border-bottom:1px solid var(--line); outline:none; padding:2px 0; color:var(--ink);" placeholder="Кол-во" autocomplete="off" maxlength="10" class="inline-add-qty">' +
+          '<button type="submit" style="background:none; border:none; font-size:18px; color:var(--accent-strong); cursor:pointer; padding:0 2px; line-height:1;">✓</button>';
+        addRow.addEventListener("submit", function(e) {
+          e.preventDefault();
+          var what = addRow.querySelector(".inline-add-what").value.trim();
+          var qty = addRow.querySelector(".inline-add-qty").value.trim();
+          if (!what) return;
+          var l = loadShopping();
+          l.push({ id: "s" + Date.now(), what: what, qty: qty, place: placeName });
+          saveShopping(l);
+          var catalog = loadCatalog();
+          var already = catalog.some(function(c){ return c.what.toLowerCase() === what.toLowerCase(); });
+          if (!already) { catalog.push({ id: "cat" + Date.now(), place: placeName, what: what }); saveCatalog(catalog); updateShoppingWhatList(); }
+          renderShopping();
+        });
+        wrap.appendChild(addRow);
+      })(group.place || "");
     });
+  }
+
+  function updateShoppingWhatList() {
+    var dl = document.getElementById("shoppingWhatList");
+    if (!dl) return;
+    var catalog = loadCatalog();
+    var names = [];
+    catalog.forEach(function(c) { if (names.indexOf(c.what) === -1) names.push(c.what); });
+    names.sort(function(a,b){ return a.localeCompare(b, "ru"); });
+    dl.innerHTML = names.map(function(n){ return '<option value="' + escapeHtml(n) + '">'; }).join("");
   }
 
   function renderWishlist() {
@@ -2739,144 +2759,15 @@ function setTab(name) {
     document.getElementById("shoppingForm").style.display = "flex";
     document.getElementById("shoppingList").style.display = "block";
     document.getElementById("clearShoppingBtn").style.display = "block";
-    document.getElementById("shoppingInlineCatalog").style.display = "none";
     document.getElementById("shoppingDayDropdown").style.display = "none";
-    document.getElementById("shoppingCatalogBtn").classList.remove("active");
     document.getElementById("shoppingDayBtn").classList.remove("active");
     document.getElementById("wishlistSection").style.display = "block";
   }
-
-  function shoppingShowCatalog() {
-    document.getElementById("shoppingForm").style.display = "none";
-    document.getElementById("shoppingList").style.display = "none";
-    document.getElementById("clearShoppingBtn").style.display = "none";
-    document.getElementById("shoppingDayDropdown").style.display = "none";
-    document.getElementById("shoppingDayBtn").classList.remove("active");
-    document.getElementById("shoppingCatalogBtn").classList.add("active");
-    document.getElementById("wishlistSection").style.display = "none";
-    var panel = document.getElementById("shoppingInlineCatalog");
-    panel.style.display = "block";
-    renderInlineCatalog(false);
-  }
-
-  var catalogInlineEditing = false;
-
-  function renderInlineCatalog(editing) {
-    catalogInlineEditing = editing;
-    updateCatalogPlacesList();
-    var btn = document.getElementById("catalogInlineEditBtn");
-    if (btn) { btn.textContent = editing ? "Готово" : "Изменить"; btn.classList.toggle("active", editing); }
-    var catalog = loadCatalog();
-    var wrap = document.getElementById("shoppingInlineCatalogList");
-    wrap.innerHTML = "";
-    if (catalog.length === 0) {
-      wrap.innerHTML += '<div class="shopping-empty">Каталог пуст — добавляй продукты в список, они будут копиться здесь.</div>';
-      return;
-    }
-    var groups = {}, groupOrder = [];
-    catalog.forEach(function(item) {
-      var key = item.place || "";
-      if (!groups[key]) { groups[key] = []; groupOrder.push(key); }
-      groups[key].push(item);
-    });
-    groupOrder.sort(function(a, b) { return a.localeCompare(b, "ru"); });
-    groupOrder.forEach(function(place) {
-      groups[place].sort(function(a, b) { return a.what.localeCompare(b.what, "ru"); });
-    });
-    var isFirst = true;
-    groupOrder.forEach(function(place) {
-      if (place) {
-        var h = document.createElement("div");
-        h.className = "shopping-group-heading";
-        h.style.cssText = "display:flex; justify-content:space-between; align-items:center;";
-        var placeName = document.createElement("span");
-        placeName.textContent = place;
-        h.appendChild(placeName);
-        if (!editing && isFirst) {
-          var lbl = document.createElement("span");
-          lbl.style.cssText = "font-size:10px; color:var(--ink-muted); text-align:right; line-height:1.3; flex-shrink:0; margin-left:8px;";
-          lbl.textContent = "Добавить\nв покупки";
-          lbl.style.whiteSpace = "pre";
-          h.appendChild(lbl);
-          isFirst = false;
-        }
-        wrap.appendChild(h);
-      }
-      groups[place].forEach(function(item) {
-        var row = document.createElement("div");
-        row.className = "shopping-item";
-        if (editing) {
-          row.innerHTML = '<span class="info"><div class="what">' + escapeHtml(item.what) + '</div></span>' +
-            '<button class="remove" aria-label="Удалить">×</button>';
-          row.querySelector(".remove").addEventListener("click", function() {
-            var l = loadCatalog();
-            var idx = l.findIndex(function(c){ return c.id === item.id; });
-            if (idx !== -1) l.splice(idx, 1);
-            saveCatalog(l);
-            renderInlineCatalog(true);
-          });
-        } else {
-          row.style.cursor = "pointer";
-          row.innerHTML = '<span class="info"><div class="what">' + escapeHtml(item.what) + '</div></span>' +
-            '<span style="font-size:18px; color:var(--accent); padding-right:4px;">+</span>';
-          row.addEventListener("click", function() {
-            var l = loadShopping();
-            l.push({ id: "sh" + Date.now(), place: item.place || "", what: item.what });
-            saveShopping(l);
-            var plus = row.querySelector("span:last-child");
-            plus.textContent = "✓";
-            setTimeout(function(){ plus.textContent = "+"; }, 1200);
-          });
-        }
-        wrap.appendChild(row);
-      });
-    });
-  }
-
-  document.getElementById("catalogInlineEditBtn").addEventListener("click", function() {
-    renderInlineCatalog(!catalogInlineEditing);
-  });
-
-  function updateCatalogPlacesList() {
-    var dl = document.getElementById("catalogPlacesList");
-    if (!dl) return;
-    var catalog = loadCatalog();
-    var places = [];
-    catalog.forEach(function(item) {
-      if (item.place && places.indexOf(item.place) === -1) places.push(item.place);
-    });
-    places.sort(function(a, b) { return a.localeCompare(b, "ru"); });
-    dl.innerHTML = places.map(function(p) { return '<option value="' + escapeHtml(p) + '">'; }).join("");
-  }
-
-  document.getElementById("catalogInlineForm").addEventListener("submit", function(e) {
-    e.preventDefault();
-    var place = document.getElementById("fCatalogInlinePlace").value.trim();
-    var what = document.getElementById("fCatalogInlineWhat").value.trim();
-    if (!what) return;
-    var catalog = loadCatalog();
-    var already = catalog.some(function(c){ return c.what.toLowerCase() === what.toLowerCase(); });
-    if (already) {
-      var warn = document.createElement("div");
-      warn.style.cssText = "font-size:12px; color:var(--accent); margin-top:4px;";
-      warn.textContent = "«" + what + "» уже есть в каталоге";
-      this.parentNode.insertBefore(warn, this.nextSibling);
-      setTimeout(function(){ if (warn.parentNode) warn.remove(); }, 3000);
-      return;
-    }
-    catalog.push({ id: "cat" + Date.now(), place: place, what: what });
-    saveCatalog(catalog);
-    document.getElementById("fCatalogInlinePlace").value = "";
-    document.getElementById("fCatalogInlineWhat").value = "";
-    renderInlineCatalog(catalogInlineEditing);
-  });
 
   function shoppingShowDayPicker() {
     document.getElementById("shoppingForm").style.display = "none";
     document.getElementById("shoppingList").style.display = "none";
     document.getElementById("clearShoppingBtn").style.display = "none";
-    document.getElementById("shoppingInlineCatalog").style.display = "none";
-    document.getElementById("shoppingCatalogBtn").classList.remove("active");
     document.getElementById("shoppingDayBtn").classList.add("active");
     document.getElementById("shoppingDayDropdown").style.display = "block";
     document.getElementById("wishlistSection").style.display = "none";
@@ -2886,10 +2777,6 @@ function setTab(name) {
     });
   }
 
-  document.getElementById("shoppingCatalogBtn").addEventListener("click", function () {
-    var isOpen = document.getElementById("shoppingInlineCatalog").style.display !== "none";
-    if (isOpen) { shoppingShowMain(); } else { shoppingShowCatalog(); }
-  });
 
   document.getElementById("shoppingDayBtn").addEventListener("click", function () {
     var isOpen = document.getElementById("shoppingDayDropdown").style.display !== "none";
