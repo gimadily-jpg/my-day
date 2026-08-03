@@ -384,6 +384,23 @@
     font-size: 12px;
     color: var(--ink-faint);
   }
+  .nutr-goal-btn {
+    flex: 1;
+    appearance: none;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    color: var(--ink-muted);
+    border-radius: 8px;
+    padding: 5px 8px;
+    font: inherit;
+    font-size: 12.5px;
+    cursor: pointer;
+  }
+  .nutr-goal-btn.active {
+    background: var(--accent-soft);
+    color: var(--accent-strong);
+    border-color: var(--accent-soft);
+  }
   .edit-toggle-btn {
     appearance: none;
     border: 1px solid var(--line);
@@ -567,7 +584,7 @@
     padding: 9px 10px;
   }
   .shopping-form input:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
-  .shopping-form .f-place { width: 84px; flex: none; }
+  .shopping-form .f-place { flex: 1; min-width: 0; }
   .shopping-form .f-what { flex: 1; min-width: 0; }
   .shopping-form button {
     flex: none;
@@ -985,25 +1002,10 @@
 
     <div class="tab-panel" data-panel="shopping">
       <section class="card shop-card" id="shoppingSection">
-        <h2 style="display:flex; align-items:baseline; justify-content:space-between;">
-          <span>Продукты</span>
-          <button type="button" class="edit-toggle-btn" id="shoppingDayBtn">День покупки</button>
-        </h2>
+        <h2>Продукты</h2>
         <datalist id="shoppingWhatList"></datalist>
-        <div id="shoppingDayDropdown" style="display:none; background:var(--surface-2); border:0.5px solid var(--border-strong); border-radius:10px; margin-bottom:8px; overflow:hidden;">
-          <div class="plan-day-row" data-dow="1">Понедельник</div>
-          <div class="plan-day-row" data-dow="2">Вторник</div>
-          <div class="plan-day-row" data-dow="3">Среда</div>
-          <div class="plan-day-row" data-dow="4">Четверг</div>
-          <div class="plan-day-row" data-dow="5">Пятница</div>
-          <div class="plan-day-row" data-dow="6">Суббота</div>
-          <div class="plan-day-row" data-dow="0">Воскресенье</div>
-          <div id="shoppingDayHint" class="footnote" style="text-align:left; padding:8px 14px; display:none;"></div>
-        </div>
         <form class="shopping-form" id="shoppingForm" style="margin-bottom:8px;">
-          <input class="f-place" id="fPlace" placeholder="Место" autocomplete="off" maxlength="24">
-          <input class="f-what" id="fWhat" placeholder="Что купить" autocomplete="off" maxlength="80" required>
-          <input class="f-qty" id="fQty" placeholder="Кол-во" autocomplete="off" maxlength="10" style="width:70px;">
+          <input class="f-place" id="fPlace" placeholder="Где купить" autocomplete="off" maxlength="24" required>
           <button type="submit">+</button>
         </form>
         <div id="shoppingList"></div>
@@ -1043,13 +1045,35 @@
       </section>
 
       <section class="card">
-        <h2 style="display:flex; align-items:center; justify-content:space-between;">
-          <span>Питание</span>
-          <span class="weight-inline">
-            <input id="weightInput" type="number" min="0" step="0.1" inputmode="decimal">
-            <span class="weight-inline-label">кг</span>
-          </span>
-        </h2>
+        <h2>Питание</h2>
+        <div id="nutritionParams" style="margin:8px 0 14px; font-size:13px;">
+          <div style="display:flex; gap:12px; flex-wrap:wrap; margin-bottom:8px; align-items:center;">
+            <span style="display:flex; gap:8px;">
+              <label style="display:flex; align-items:center; gap:4px; cursor:pointer;"><input type="radio" name="nutritionGender" value="f" id="genderF"> Женский</label>
+              <label style="display:flex; align-items:center; gap:4px; cursor:pointer;"><input type="radio" name="nutritionGender" value="m" id="genderM"> Мужской</label>
+            </span>
+            <label style="display:flex; align-items:center; gap:4px;">Возраст <input id="nutritionAge" type="number" min="10" max="100" inputmode="numeric" style="width:46px; font:inherit; font-size:13px; border:none; border-bottom:1px solid var(--line); background:none; text-align:center; color:var(--ink); outline:none;"> лет</label>
+            <label style="display:flex; align-items:center; gap:4px;">Рост <input id="nutritionHeight" type="number" min="100" max="250" inputmode="numeric" style="width:50px; font:inherit; font-size:13px; border:none; border-bottom:1px solid var(--line); background:none; text-align:center; color:var(--ink); outline:none;"> см</label>
+          </div>
+          <div style="display:flex; gap:12px; flex-wrap:wrap; margin-bottom:8px; align-items:center;">
+            <label style="display:flex; align-items:center; gap:4px;">Текущий вес <input id="weightInput" type="number" min="0" step="0.1" inputmode="decimal" style="width:54px; font:inherit; font-size:13px; border:none; border-bottom:1px solid var(--line); background:none; text-align:center; color:var(--ink); outline:none;"> кг</label>
+            <label style="display:flex; align-items:center; gap:4px;">Целевой вес <input id="targetWeightInput" type="number" min="0" step="0.1" inputmode="decimal" style="width:54px; font:inherit; font-size:13px; border:none; border-bottom:1px solid var(--line); background:none; text-align:center; color:var(--ink); outline:none;"> кг</label>
+          </div>
+          <div style="margin-bottom:8px;">
+            <select id="nutritionActivity" style="font:inherit; font-size:13px; border:1px solid var(--line); border-radius:7px; background:var(--surface-2); color:var(--ink); padding:4px 8px; width:100%;">
+              <option value="1.2">Сидячий образ жизни</option>
+              <option value="1.375">Лёгкая активность (1–3 раза/нед)</option>
+              <option value="1.55">Средняя активность (3–5 раз/нед)</option>
+              <option value="1.725">Высокая активность (6–7 раз/нед)</option>
+              <option value="1.9">Очень высокая активность</option>
+            </select>
+          </div>
+          <div style="display:flex; gap:6px;">
+            <button type="button" class="nutr-goal-btn" data-goal="lose">Похудение</button>
+            <button type="button" class="nutr-goal-btn active" data-goal="maintain">Поддержание</button>
+            <button type="button" class="nutr-goal-btn" data-goal="gain">Набор массы</button>
+          </div>
+        </div>
         <div class="chart-title" style="margin-bottom: 4px;">Калории, ккал</div>
         <div class="kcal-summary">
           <div class="kcal-stat">
@@ -1335,6 +1359,39 @@
   function saveCarbsGoal(v) {
     localStorage.setItem(CARBS_GOAL_KEY, String(v));
     flashSaved();
+  }
+
+  var NUTRITION_PARAMS_KEY = "tracker.nutritionParams";
+  function loadNutritionParams() {
+    var raw = localStorage.getItem(NUTRITION_PARAMS_KEY);
+    if (raw) { try { return JSON.parse(raw); } catch(e) {} }
+    return { gender: "f", age: "", height: "", activity: "1.55", goal: "maintain", targetWeight: "" };
+  }
+  function saveNutritionParams(p) {
+    localStorage.setItem(NUTRITION_PARAMS_KEY, JSON.stringify(p));
+    flashSaved();
+  }
+  function calcNutritionGoals() {
+    var p = loadNutritionParams();
+    var weight = parseFloat(document.getElementById("weightInput").value) || 0;
+    var age = parseFloat(p.age) || 0;
+    var height = parseFloat(p.height) || 0;
+    if (!weight || !age || !height) return;
+    var bmr = p.gender === "m"
+      ? 10 * weight + 6.25 * height - 5 * age + 5
+      : 10 * weight + 6.25 * height - 5 * age - 161;
+    var tdee = bmr * parseFloat(p.activity);
+    var mult = p.goal === "lose" ? 0.85 : p.goal === "gain" ? 1.15 : 1.0;
+    var kcal = Math.round(tdee * mult / 10) * 10;
+    var protein = Math.round(weight * 1.8);
+    var fat = Math.round(kcal * 0.25 / 9);
+    var carbs = Math.max(0, Math.round((kcal - protein * 4 - fat * 9) / 4));
+    document.getElementById("kcalGoal").value = kcal;
+    document.getElementById("proteinGoal").value = protein;
+    document.getElementById("fatGoal").value = fat;
+    document.getElementById("carbsGoal").value = carbs;
+    saveGoal(kcal); saveProteinGoal(protein); saveFatGoal(fat); saveCarbsGoal(carbs);
+    renderNutrition();
   }
 
   function emptyDay() { return { checked: {}, notes: "", insights: "", meals: [], weight: null, scheduleOverride: { removed: [], edited: {}, added: [] } }; }
@@ -1654,78 +1711,117 @@
     var bought = loadShoppingBought(shoppingDateKey);
     var wrap = document.getElementById("shoppingList");
     wrap.innerHTML = "";
-    if (list.length === 0) {
-      var empty = document.createElement("div");
-      empty.className = "shopping-empty";
-      empty.textContent = "Список пуст — добавь, что нужно купить.";
-      wrap.appendChild(empty);
-      return;
-    }
+
     var groups = [];
     var groupByPlace = {};
     list.forEach(function(item, idx) {
       var key = item.place || "";
       if (!(key in groupByPlace)) {
-        groupByPlace[key] = { place: item.place, entries: [] };
+        groupByPlace[key] = { place: item.place || "", entries: [] };
         groups.push(groupByPlace[key]);
       }
       groupByPlace[key].entries.push({ item: item, idx: idx });
     });
 
+    var savedPlaces = loadShoppingPlaces();
+    savedPlaces.forEach(function(p) {
+      if (!(p in groupByPlace)) {
+        groupByPlace[p] = { place: p, entries: [] };
+        groups.push(groupByPlace[p]);
+      }
+    });
+
+    if (groups.length === 0) {
+      var empty = document.createElement("div");
+      empty.className = "shopping-empty";
+      empty.textContent = "Добавь место покупки выше.";
+      wrap.appendChild(empty);
+      return;
+    }
+
     var placeOrder = loadPlaceOrder();
     groups.forEach(function(g) {
-      var key = g.place || "";
-      if (placeOrder.indexOf(key) === -1) placeOrder.push(key);
+      if (placeOrder.indexOf(g.place) === -1) placeOrder.push(g.place);
     });
-    var activePlaces = groups.map(function(g) { return g.place || ""; });
-    placeOrder = placeOrder.filter(function(p) { return activePlaces.indexOf(p) !== -1; });
+    var allPlaces = groups.map(function(g) { return g.place; });
+    placeOrder = placeOrder.filter(function(p) { return allPlaces.indexOf(p) !== -1; });
     savePlaceOrder(placeOrder);
     groups.sort(function(a, b) {
-      return placeOrder.indexOf(a.place || "") - placeOrder.indexOf(b.place || "");
+      return placeOrder.indexOf(a.place) - placeOrder.indexOf(b.place);
     });
 
     groups.forEach(function (group) {
-      if (group.place) {
-        var heading = document.createElement("div");
-        heading.className = "shopping-group-heading";
-        heading.style.cssText = "display:flex; justify-content:space-between; align-items:center;";
-        var nameSpan = document.createElement("span");
-        nameSpan.textContent = group.place;
-        heading.appendChild(nameSpan);
-        var gi = placeOrder.indexOf(group.place);
-        var arrows = document.createElement("span");
-        arrows.style.cssText = "display:flex; flex-shrink:0;";
-        if (gi > 0) {
-          var upBtn = document.createElement("button");
-          upBtn.textContent = "↑";
-          upBtn.style.cssText = "background:none;border:none;cursor:pointer;font-size:13px;color:var(--ink-muted);padding:0 3px;line-height:1;";
-          (function(i) {
-            upBtn.addEventListener("click", function(e) {
-              e.stopPropagation();
-              var tmp = placeOrder[i]; placeOrder[i] = placeOrder[i-1]; placeOrder[i-1] = tmp;
-              savePlaceOrder(placeOrder);
-              renderShopping();
-            });
-          })(gi);
-          arrows.appendChild(upBtn);
-        }
-        if (gi < placeOrder.length - 1) {
-          var downBtn = document.createElement("button");
-          downBtn.textContent = "↓";
-          downBtn.style.cssText = "background:none;border:none;cursor:pointer;font-size:13px;color:var(--ink-muted);padding:0 3px;line-height:1;";
-          (function(i) {
-            downBtn.addEventListener("click", function(e) {
-              e.stopPropagation();
-              var tmp = placeOrder[i]; placeOrder[i] = placeOrder[i+1]; placeOrder[i+1] = tmp;
-              savePlaceOrder(placeOrder);
-              renderShopping();
-            });
-          })(gi);
-          arrows.appendChild(downBtn);
-        }
-        heading.appendChild(arrows);
-        wrap.appendChild(heading);
+      var heading = document.createElement("div");
+      heading.className = "shopping-group-heading";
+      heading.style.cssText = "display:flex; justify-content:space-between; align-items:center;";
+
+      var leftSide = document.createElement("span");
+      leftSide.style.cssText = "display:flex; align-items:center; gap:4px;";
+      var nameSpan = document.createElement("span");
+      nameSpan.textContent = group.place;
+      leftSide.appendChild(nameSpan);
+      heading.appendChild(leftSide);
+
+      var leftControls = document.createElement("span");
+      leftControls.style.cssText = "display:flex; align-items:center; flex-shrink:0; gap:2px;";
+
+      var gi = placeOrder.indexOf(group.place);
+      if (gi > 0) {
+        var upBtn = document.createElement("button");
+        upBtn.textContent = "↑";
+        upBtn.style.cssText = "background:none;border:none;cursor:pointer;font-size:13px;color:var(--ink-muted);padding:0 3px;line-height:1;";
+        (function(i) {
+          upBtn.addEventListener("click", function(e) {
+            e.stopPropagation();
+            var tmp = placeOrder[i]; placeOrder[i] = placeOrder[i-1]; placeOrder[i-1] = tmp;
+            savePlaceOrder(placeOrder);
+            renderShopping();
+          });
+        })(gi);
+        leftControls.appendChild(upBtn);
       }
+      if (gi < placeOrder.length - 1) {
+        var downBtn = document.createElement("button");
+        downBtn.textContent = "↓";
+        downBtn.style.cssText = "background:none;border:none;cursor:pointer;font-size:13px;color:var(--ink-muted);padding:0 3px;line-height:1;";
+        (function(i) {
+          downBtn.addEventListener("click", function(e) {
+            e.stopPropagation();
+            var tmp = placeOrder[i]; placeOrder[i] = placeOrder[i+1]; placeOrder[i+1] = tmp;
+            savePlaceOrder(placeOrder);
+            renderShopping();
+          });
+        })(gi);
+        leftControls.appendChild(downBtn);
+      }
+
+      (function(placeName, headingEl, leftSideEl) {
+        var delBtn = document.createElement("button");
+        delBtn.textContent = "×";
+        delBtn.style.cssText = "background:none;border:none;cursor:pointer;font-size:16px;color:var(--ink-muted);padding:0;line-height:1;";
+        delBtn.addEventListener("click", function(e) {
+          e.stopPropagation();
+          var confirmRow = document.createElement("span");
+          confirmRow.style.cssText = "font-size:12px; color:var(--ink-muted); display:flex; align-items:center; gap:6px;";
+          confirmRow.innerHTML = 'Удалить место покупки? <button type="button" style="background:var(--accent);color:#fff;border:none;border-radius:5px;padding:2px 8px;font-size:12px;cursor:pointer;">Да</button><button type="button" style="background:none;border:1px solid var(--line);border-radius:5px;padding:2px 8px;font-size:12px;cursor:pointer;">Нет</button>';
+          headingEl.replaceWith(confirmRow);
+          confirmRow.querySelectorAll("button")[0].addEventListener("click", function() {
+            var l = loadShopping().filter(function(i){ return i.place !== placeName; });
+            saveShopping(l);
+            var sp = loadShoppingPlaces().filter(function(p){ return p !== placeName; });
+            saveShoppingPlaces(sp);
+            renderShopping();
+          });
+          confirmRow.querySelectorAll("button")[1].addEventListener("click", function() {
+            confirmRow.replaceWith(headingEl);
+          });
+        });
+        leftSideEl.appendChild(delBtn);
+      })(group.place, heading, leftSide);
+
+      heading.appendChild(leftControls);
+      wrap.appendChild(heading);
+
       group.entries.forEach(function (entry) {
         var item = entry.item, idx = entry.idx;
         var isBought = !!bought[item.id];
@@ -1753,7 +1849,7 @@
         var addRow = document.createElement("form");
         addRow.style.cssText = "display:flex; gap:6px; padding:6px 0 2px; align-items:center;";
         addRow.innerHTML =
-          '<input style="flex:1; font-size:14px; background:none; border:none; border-bottom:1px solid var(--line); outline:none; padding:2px 0; color:var(--ink);" placeholder="+ Добавить позицию" autocomplete="off" maxlength="80" list="shoppingWhatList" class="inline-add-what">' +
+          '<input style="flex:1; font-size:14px; background:none; border:none; border-bottom:1px solid var(--line); outline:none; padding:2px 0; color:var(--ink);" placeholder="Добавить" autocomplete="off" maxlength="80" list="shoppingWhatList" class="inline-add-what">' +
           '<input style="width:60px; font-size:14px; background:none; border:none; border-bottom:1px solid var(--line); outline:none; padding:2px 0; color:var(--ink);" placeholder="Кол-во" autocomplete="off" maxlength="10" class="inline-add-qty">' +
           '<button type="submit" style="background:none; border:none; font-size:18px; color:var(--accent-strong); cursor:pointer; padding:0 2px; line-height:1;">✓</button>';
         addRow.addEventListener("submit", function(e) {
@@ -1770,7 +1866,7 @@
           renderShopping();
         });
         wrap.appendChild(addRow);
-      })(group.place || "");
+      })(group.place);
     });
   }
 
@@ -2113,18 +2209,28 @@
       { key: "work", label: "Работа, ч в день", min: 0, fmt: function(v){ return v + " ч"; } },
       { key: "walk", label: "Прогулки, ч в день", min: 0, fmt: function(v){ return v + " ч"; } },
       { key: "kcalStatus", label: "Питание (в рамках калорий)", diverging: true, min: -1, max: 1, fmt: function(v){ return v > 0 ? "норма" : "перебор"; } },
-      { key: "weight", label: "Вес, кг", goalLine: 52, fmt: function(v){ return v; } }
+      { key: "weight", label: "Вес, кг", goalLine: parseFloat(loadNutritionParams().targetWeight) || null, fmt: function(v){ return v; } }
     ];
 
     charts.forEach(function (c) {
       var pts = days.filter(function(d){ return d[c.key] !== null && d[c.key] !== undefined; });
-      var current = pts.length ? pts[pts.length - 1][c.key] : null;
+      var currentVal = pts.length ? pts[pts.length - 1][c.key] : null;
       var card = document.createElement("div");
       card.className = "chart-card";
+      var extra = "";
+      if (c.key === "weight") {
+        var target = parseFloat(loadNutritionParams().targetWeight);
+        if (target && currentVal !== null) {
+          var diff = Math.round((currentVal - target) * 10) / 10;
+          if (diff > 0) extra = '<div style="font-size:12px; color:var(--ink-muted); margin-top:2px;">До цели ' + target + ' кг: осталось ' + diff + ' кг</div>';
+          else if (diff < 0) extra = '<div style="font-size:12px; color:var(--accent-strong); margin-top:2px;">Цель ' + target + ' кг достигнута 🎉</div>';
+          else extra = '<div style="font-size:12px; color:var(--accent-strong); margin-top:2px;">Цель ' + target + ' кг достигнута 🎉</div>';
+        }
+      }
       card.innerHTML =
         '<div class="chart-head"><span class="chart-title">' + c.label + '</span>' +
-        '<span class="chart-current">' + (current !== null ? c.fmt(current) : "—") + '</span></div>' +
-        sparklineSVG(days, c.key, c);
+        '<span class="chart-current">' + (currentVal !== null ? c.fmt(currentVal) : "—") + '</span></div>' +
+        sparklineSVG(days, c.key, c) + extra;
       wrap.appendChild(card);
     });
   }
@@ -2253,33 +2359,13 @@
   document.getElementById("shoppingForm").addEventListener("submit", function (e) {
     e.preventDefault();
     var place = document.getElementById("fPlace").value.trim();
-    var what = document.getElementById("fWhat").value.trim();
-    var qty = document.getElementById("fQty").value.trim();
-    if (!what) return;
-    var list = loadShopping();
-    var dupInList = list.some(function(i){ return i.what.toLowerCase() === what.toLowerCase(); });
-    if (dupInList) {
-      var hint = document.getElementById("mealAddHint");
-      var dupMsg = document.createElement("div");
-      dupMsg.style.cssText = "font-size:12px; color:var(--accent); margin-top:4px;";
-      dupMsg.textContent = "«" + what + "» уже есть в списке";
-      var form = document.getElementById("shoppingForm");
-      var existing = form.nextElementSibling && form.nextElementSibling.classList.contains("dup-warn") ? form.nextElementSibling : null;
-      if (!existing) {
-        dupMsg.className = "dup-warn";
-        form.parentNode.insertBefore(dupMsg, form.nextSibling);
-        setTimeout(function(){ if (dupMsg.parentNode) dupMsg.remove(); }, 3000);
-      }
-      return;
+    if (!place) return;
+    var places = loadShoppingPlaces();
+    if (places.indexOf(place) === -1) {
+      places.push(place);
+      saveShoppingPlaces(places);
     }
-    list.push({ id: "sh" + Date.now(), place: place, what: what, qty: qty });
-    saveShopping(list);
-    var catalog = loadCatalog();
-    var already = catalog.some(function(c){ return c.what.toLowerCase() === what.toLowerCase(); });
-    if (!already) { catalog.push({ id: "cat" + Date.now(), place: place, what: what }); saveCatalog(catalog); }
     document.getElementById("fPlace").value = "";
-    document.getElementById("fWhat").value = "";
-    document.getElementById("fQty").value = "";
     renderShopping();
   });
 
@@ -2326,7 +2412,52 @@
     dayData.weight = e.target.value === "" ? null : Number(e.target.value);
     saveDay(current, dayData);
     renderStats();
+    calcNutritionGoals();
   });
+
+  // Nutrition params init & listeners
+  (function() {
+    var p = loadNutritionParams();
+    document.getElementById(p.gender === "m" ? "genderM" : "genderF").checked = true;
+    if (p.age) document.getElementById("nutritionAge").value = p.age;
+    if (p.height) document.getElementById("nutritionHeight").value = p.height;
+    if (p.targetWeight) document.getElementById("targetWeightInput").value = p.targetWeight;
+    document.getElementById("nutritionActivity").value = p.activity;
+    document.querySelectorAll(".nutr-goal-btn").forEach(function(btn) {
+      btn.classList.toggle("active", btn.dataset.goal === p.goal);
+    });
+
+    function onParamChange() {
+      var p = loadNutritionParams();
+      p.gender = document.querySelector('input[name="nutritionGender"]:checked').value;
+      p.age = document.getElementById("nutritionAge").value;
+      p.height = document.getElementById("nutritionHeight").value;
+      p.activity = document.getElementById("nutritionActivity").value;
+      p.targetWeight = document.getElementById("targetWeightInput").value;
+      saveNutritionParams(p);
+      calcNutritionGoals();
+      renderStats();
+    }
+
+    document.querySelectorAll('input[name="nutritionGender"]').forEach(function(r) {
+      r.addEventListener("change", onParamChange);
+    });
+    document.getElementById("nutritionAge").addEventListener("change", onParamChange);
+    document.getElementById("nutritionHeight").addEventListener("change", onParamChange);
+    document.getElementById("nutritionActivity").addEventListener("change", onParamChange);
+    document.getElementById("targetWeightInput").addEventListener("change", onParamChange);
+
+    document.querySelectorAll(".nutr-goal-btn").forEach(function(btn) {
+      btn.addEventListener("click", function() {
+        document.querySelectorAll(".nutr-goal-btn").forEach(function(b){ b.classList.remove("active"); });
+        this.classList.add("active");
+        var p = loadNutritionParams();
+        p.goal = this.dataset.goal;
+        saveNutritionParams(p);
+        calcNutritionGoals();
+      });
+    });
+  })();
 
   document.getElementById("mealPasteType").addEventListener("change", function (e) {
     saveMealPasteType(e.target.value);
@@ -2726,6 +2857,15 @@ function setTab(name) {
 
   var SHOPPING_DAY_KEY = "tracker.shoppingDay";
   var SHOPPING_PLACE_ORDER_KEY = "tracker.shopping.placeOrder";
+  var SHOPPING_PLACES_KEY = "tracker.shopping.places";
+  function loadShoppingPlaces() {
+    var raw = localStorage.getItem(SHOPPING_PLACES_KEY);
+    if (raw) { try { return JSON.parse(raw); } catch(e) {} }
+    return [];
+  }
+  function saveShoppingPlaces(arr) {
+    localStorage.setItem(SHOPPING_PLACES_KEY, JSON.stringify(arr));
+  }
   function loadPlaceOrder() {
     var raw = localStorage.getItem(SHOPPING_PLACE_ORDER_KEY);
     if (raw) { try { return JSON.parse(raw); } catch(e) {} }
@@ -2743,56 +2883,7 @@ function setTab(name) {
   }
   var DOW_NAMES = ["Воскресенье","Понедельник","Вторник","Среда","Четверг","Пятница","Суббота"];
 
-  function updateShoppingDayHint() {
-    var hint = document.getElementById("shoppingDayHint");
-    var dow = loadShoppingDay();
-    hint.textContent = "День покупки: " + DOW_NAMES[dow];
-    hint.style.display = "block";
-  }
-
-  updateShoppingDayHint();
-
   var lastRemovedShopping = null;
-
-
-  function shoppingShowMain() {
-    document.getElementById("shoppingForm").style.display = "flex";
-    document.getElementById("shoppingList").style.display = "block";
-    document.getElementById("clearShoppingBtn").style.display = "block";
-    document.getElementById("shoppingDayDropdown").style.display = "none";
-    document.getElementById("shoppingDayBtn").classList.remove("active");
-    document.getElementById("wishlistSection").style.display = "block";
-  }
-
-  function shoppingShowDayPicker() {
-    document.getElementById("shoppingForm").style.display = "none";
-    document.getElementById("shoppingList").style.display = "none";
-    document.getElementById("clearShoppingBtn").style.display = "none";
-    document.getElementById("shoppingDayBtn").classList.add("active");
-    document.getElementById("shoppingDayDropdown").style.display = "block";
-    document.getElementById("wishlistSection").style.display = "none";
-    var savedDow = loadShoppingDay();
-    document.querySelectorAll("#shoppingDayDropdown .plan-day-row").forEach(function(r){
-      r.classList.toggle("plan-active", parseInt(r.dataset.dow) === savedDow);
-    });
-  }
-
-
-  document.getElementById("shoppingDayBtn").addEventListener("click", function () {
-    var isOpen = document.getElementById("shoppingDayDropdown").style.display !== "none";
-    if (isOpen) { shoppingShowMain(); } else { shoppingShowDayPicker(); }
-  });
-
-  document.querySelectorAll("#shoppingDayDropdown .plan-day-row").forEach(function (row) {
-    row.addEventListener("click", function () {
-      var dow = parseInt(this.dataset.dow);
-      saveShoppingDay(dow);
-      document.querySelectorAll("#shoppingDayDropdown .plan-day-row").forEach(function(r){ r.classList.remove("plan-active"); });
-      this.classList.add("plan-active");
-      updateShoppingDayHint();
-      shoppingShowMain();
-    });
-  });
 
   document.getElementById("clearShoppingBtn").addEventListener("click", function () {
     var boughtNow = loadShoppingBought(isoKey(current));
