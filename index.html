@@ -1417,8 +1417,9 @@
     if (wantLose && delta >= 0) { hint.textContent = "Цель — похудение, но выбранная калорийность не создаёт дефицита."; hint.style.display = "block"; return; }
     if (!wantLose && delta <= 0) { hint.textContent = "Цель — набор массы, но выбранная калорийность не создаёт профицита."; hint.style.display = "block"; return; }
     var weeks = Math.round(diff * 7700 / (Math.abs(delta) * 7));
+    var months = Math.round(weeks / 4.3);
     var direction = delta < 0 ? "дефиците" : "профиците";
-    hint.textContent = "До цели: " + diff.toFixed(1).replace(".",",") + " кг — ориентировочно " + weeks + " нед. при текущем " + direction + ". Ориентир, не гарантия.";
+    hint.textContent = "До цели: " + diff.toFixed(1).replace(".",",") + " кг — ориентировочно " + weeks + " нед. (" + months + " мес.) при текущем " + direction + ". Ориентир, не гарантия.";
     hint.style.display = "block";
   }
 
@@ -2042,6 +2043,7 @@
   }
 
   function renderNutrition() {
+    renderWeightPace();
     var raw = localStorage.getItem(MEAL_PASTE_TYPE_KEY);
     var typeToShow = "breakfast";
     if (raw) {
